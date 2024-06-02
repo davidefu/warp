@@ -14,6 +14,10 @@ class DefaultSettings(object):
     # (after the current week)
     WEEKS_IN_ADVANCE = 1
 
+    # Weekdays to hide for reservation, 0 for monday to 6 for sunday
+    # Set to [5,6] to omit weekends
+    OMITTED_WEEKDAYS = []
+
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024
 
     # maximum size of uploaded map file
@@ -61,7 +65,7 @@ class DefaultSettings(object):
 
 class DevelopmentSettings(DefaultSettings):
 
-    DATABASE = "postgresql://postgres:postgres_password@127.0.0.1:5432/postgres"
+    DATABASE = "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
 
     #DATABASE = "sqlite:///warp/db.sqlite"
     #DATABASE_ARGS = {"pragmas": {"foreign_keys": "ON"}}
@@ -73,6 +77,20 @@ class DevelopmentSettings(DefaultSettings):
     ]
 
     SECRET_KEY = b'change_me'
+
+    AUTH_LDAP = True
+    LDAP_STARTTLS = False
+    LDAP_SERVER_URL = "ldap://192.168.50.212"
+    LDAP_VALIDATE_CERT = False
+    LDAP_AUTH_TYPE = "NTLM"
+    LDAP_USER_TEMPLATE = "DAXLAND\\{login}"
+    LDAP_USER_SEARCH_BASE = "CN=Users,DC=daxland,DC=local"
+    LDAP_USER_SEARCH_FILTER_TEMPLATE = "(&(sAMAccountName={login})(objectClass=user))"
+    LDAP_EXCLUDED_USERS = "['admin']"
+    LDAP_GROUP_MAP = "[ ['CN=warp,CN=Users,DC=daxland,DC=local','group_1a'], [null,'Everyone'] ]"
+    WARP_LDAP_GROUP_SEARCH_BASE = "CN=Users,DC=daxland,DC=local"
+    WARP_LDAP_GROUP_SEARCH_FILTER_TEMPLATE = "(&(sAMAccountName={login})(objectClass=user)(memberOf={group}))"
+
 
 
 class ProductionSettings(DefaultSettings):
