@@ -13,3 +13,4 @@ node_modules/
 /warp/static/dist/
 docker-compose.yml
 
+env
