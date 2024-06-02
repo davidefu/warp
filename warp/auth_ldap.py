@@ -202,7 +202,7 @@ def login():
 
     if flask.request.method == 'POST':
 
-        u = flask.request.form.get('login')
+        u = flask.request.form.get('login').lower()
         p = flask.request.form.get('password')
 
         LDAP_EXCLUDED_USERS = flask.current_app.config.get('LDAP_EXCLUDED_USERS', [])
