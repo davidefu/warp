@@ -3,6 +3,7 @@ import flask
 from warp.db import *
 from . import utils
 from . import blob_storage
+from flask import current_app
 
 bp = flask.Blueprint('view', __name__)
 
@@ -48,7 +49,10 @@ def headerDataInit():
 
 @bp.route("/")
 def index():
-    return flask.render_template('index.html')
+    with current_app.open_resource('static/version.txt', 'r') as file:
+        version = file.readlines()[0]
+
+    return flask.render_template('index.html', version = version)
 
 @bp.route("/bookings/<string:report>")
 @bp.route("/bookings", defaults={"report": "" })
