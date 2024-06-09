@@ -50,8 +50,12 @@
     <nav>
 
         <div class="nav-wrapper">
-            <div class='right'>
-                <a href="{{ url_for('view.index')}}" class="right"><img class="logo" src="{{ url_for('static', filename='images/logo.png') }}"></a>
+            <div class='right logo-header'>
+                <ul>
+                    <li><i class="material-icons">person</i></li>
+                    <li><span>{{ g.name }}</span></li>
+                    <li><a href="{{ url_for('view.index')}}" class="right"><img class="logo" src="{{ url_for('static', filename='images/logo-small.png') }}"></a></li>
+                </ul>
             </div>
             {% if g.isAdmin %}
             <ul class="right hide-on-med-and-down">

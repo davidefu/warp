@@ -12,6 +12,10 @@ NAV {
     height: 100%;
 }
 
+.nav-wrapper .logo-header A {
+    height: 64px;
+}
+
 .logo {
     height: 100%;
     padding: 10px;
