@@ -106,6 +106,9 @@ def addOrEdit():
         if jsonData['min_time'] < 0 or jsonData['max_time'] > 24*3600:
             raise ApplyError("Invalid range exception")
     
+        if jsonData['max_time'] == 86400:
+            jsonData['max_time'] = 86399
+        
         with DB.atomic():
 
             updColumns = {

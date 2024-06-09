@@ -36,7 +36,7 @@ function getSelectedDates() {
             times[1] = 24*3600-1;
     }
     else {
-        times = [0,24*3600-1];
+        times = [window.warpGlobals['minT'],window.warpGlobals['maxT']];
     }
 
     var res = [];
