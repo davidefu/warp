@@ -45,6 +45,9 @@ RUN \
 #COPY --from=compile-image /opt/warp/wheel ./wheel
 #RUN pip install --no-index wheel/*.whl
 
+ARG GIT_HASH=custom
+RUN sed -i "s/-dev/-$GIT_HASH/" /opt/warp/warp/static/version.txt
+
 COPY --from=compile-image /opt/warp/warp/static ./static
 COPY res/warp_uwsgi.ini .
 
