@@ -218,4 +218,6 @@ warpGlobals.i18n.phrases = {
         "Wybrano więcej niż %{smart_count} wiersze. Raport będzie ograniczony do tej liczby wierszów.||||"+
         "Wybrano więcej niż %{smart_count} wierszów. Raport będzie ograniczony do tej liczby wierszów.",
     "Add to group": "Dodaj do grupy",
+    "Show time slider": "Pokaż suwak czasu",
+    "Time available": "Dostępny czas"
 };

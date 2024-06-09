@@ -71,9 +71,21 @@ def zone(zid):
     if zoneRole is None:
         flask.abort(403)
 
+    zone = Zone.select(Zone.show_slider, Zone.min_time, Zone.max_time).where(Zone.id == zid)
+
     nextWeek = utils.getNextWeek()
+
+    min = 9*3600
+    max = 17*3600
+
+    if min < zone[0]['min_time']:
+        min = zone[0]['min_time']
+
+    if max > zone[0]['max_time']:
+        max = zone[0]['max_time']
+
     defaultSelectedDates = {
-        "slider": [9*3600, 17*3600]
+        "slider": [min, max]
     }
 
     for d in nextWeek[1:]:
@@ -90,12 +102,18 @@ def zone(zid):
     else:
         raise Exception('Undefined role')
 
+    showTimeSlide = 0
+    if zone[0]['show_slider']:
+        showTimeSlide = 1
 
     return flask.render_template('zone.html',
         **zoneRole,
         zid = zid,
         nextWeek=nextWeek,
-        defaultSelectedDates=defaultSelectedDates)
+        defaultSelectedDates=defaultSelectedDates,
+        showTimeSlide = showTimeSlide,
+        min = zone[0]['min_time'],
+        max = zone[0]['max_time'])
 
 @bp.route("/zone/image/<zid>")
 def zoneImage(zid):
@@ -135,7 +153,12 @@ def zones():
     if not flask.g.isAdmin:
         flask.abort(403)
 
-    return flask.render_template('zones.html')
+    defaultSelectedDates = {
+        "slider": [9*3600, 17*3600]
+    }
+
+    return flask.render_template('zones.html',
+            defaultSelectedDates=defaultSelectedDates)
 
 
 @bp.route("/groups/assign/<group_login>")
