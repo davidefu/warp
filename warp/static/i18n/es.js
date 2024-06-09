@@ -211,4 +211,6 @@ warpGlobals.i18n.phrases = {
         "Se seleccionaron más de una fila. El informe se limitará a ese número de filas.||||"+
         "Se seleccionaron {smart_count} filas. El informe se limitará a ese número de filas.",
     "Add to group": "Agregar al grupo",
+    "Show time slider": "Mostrar control deslizante de tiempo",
+    "Time available": "Tiempo disponible"
 };

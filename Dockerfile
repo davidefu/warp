@@ -30,6 +30,10 @@ RUN pip wheel -w wheel -r requirements.txt
 # build warp
 COPY warp ./warp
 COPY setup.py MANIFEST.in ./
+
+ARG GIT_HASH=custom
+RUN sed -i "s/-dev/-$GIT_HASH/" ./warp/static/version.txt
+
 RUN python setup.py bdist_wheel -d wheel
 
 FROM python:3-slim
@@ -46,6 +50,8 @@ RUN \
 #RUN pip install --no-index wheel/*.whl
 
 COPY --from=compile-image /opt/warp/warp/static ./static
+RUN rm -f ./static/version.txt
+
 COPY res/warp_uwsgi.ini .
 
 EXPOSE 8000/tcp

@@ -24,7 +24,7 @@ def listW():              #list is a built-in type
             COUNT_STAR.filter(UserToZoneRoles.zone_role == ZONE_ROLE_USER).alias("users"), \
             COUNT_STAR.filter(UserToZoneRoles.zone_role == ZONE_ROLE_VIEWER).alias("viewers")) \
         .group_by(UserToZoneRoles.zid)
-    query = Zone.select(Zone.id, Zone.name, Zone.zone_group,
+    query = Zone.select(Zone.id, Zone.name, Zone.zone_group, Zone.show_slider, Zone.min_time, Zone.max_time,
                         fn.COALESCE(countQuery.c.admins,0).alias('admins'),
                         fn.COALESCE(countQuery.c.users,0).alias('users'),
                         fn.COALESCE(countQuery.c.viewers,0).alias('viewers')) \
@@ -79,6 +79,9 @@ addOrEditSchema = {
         "id" : {"type" : "integer"},
         "name" : {"type" : "string"},
         "zone_group" : {"type" : "integer"},
+        "show_slider" : {"type": "boolean"},
+        "min_time" : {"type" : "integer"},
+        "max_time" : {"type" : "integer"}
     },
     "required": ["name", "zone_group"]
 }
@@ -95,13 +98,22 @@ def addOrEdit():
 
     class ApplyError(Exception):
         pass
-
+    
     try:
+        if jsonData['min_time'] >= jsonData['max_time']:
+            raise ApplyError("Invalid min_time exception")
+
+        if jsonData['min_time'] < 0 or jsonData['max_time'] > 24*3600:
+            raise ApplyError("Invalid range exception")
+    
         with DB.atomic():
 
             updColumns = {
                 Zone.name: jsonData['name'],
                 Zone.zone_group: jsonData['zone_group'],
+                Zone.show_slider: jsonData['show_slider'],
+                Zone.min_time: jsonData['min_time'],
+                Zone.max_time: jsonData['max_time'],
             }
 
             if 'id' in jsonData:

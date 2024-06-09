@@ -9,6 +9,8 @@
     window.warpGlobals.URLs['zonesAddOrEdit'] = "{{ url_for('xhr.zones.addOrEdit') }}";
     window.warpGlobals.URLs['zoneAssign'] = "{{ url_for('view.zoneAssign', zid='__ZID__', return=request.url) }}";
     window.warpGlobals.URLs['zoneModify'] = "{{ url_for('view.zoneModify', zid='__ZID__', return=request.url) }}";
+
+    window.warpGlobals['defaultSelectedDates'] = {{ defaultSelectedDates | tojson }};
 </script>
 
 {% endblock %}
@@ -26,6 +28,20 @@
             <div class="input-field col s12 m4">
                 <input id="zone_group" type="number" required>
                 <label for="zone_group" class="TR">Zone group</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s12 m4">
+                <label>
+                    <input id="zone_showslider" class="filled-in" type="checkbox" checked>
+                    <span class="TR">Show time slider</span>
+                </label>
+            </div>
+            <div class="zone_timeslider col s12 m8">
+                <div id="timeslider-min" class="timeslider-horizontal-hint">12:00</div>
+                <div id="timeslider" class="timeslider-horizontal"></div>
+                <div id="timeslider-max" class="timeslider-horizontal-hint">12:00</div>
+                <label for="timeslider" class="TR">Time available</label>
             </div>
         </div>
         <div class="row" style="display: none" id="error_div">

@@ -9,7 +9,15 @@
         window.warpGlobals.URLs['seatSprite'] = "{{ url_for('static',filename='images/seat_icons.png') }}";
 
         window.warpGlobals['defaultSelectedDates'] = {{ defaultSelectedDates | tojson }};
-
+        window.warpGlobals['minT'] = {{ min }};
+        window.warpGlobals['maxT'] = {{ max }};
+        if ({{ showTimeSlide }} === 1) {
+            window.warpGlobals['showTimeSlide'] = true    
+        }
+        else {
+            window.warpGlobals['showTimeSlide'] = false
+        }
+        
         {% if isZoneAdmin %}
         window.warpGlobals.isZoneAdmin = true;
         window.warpGlobals.URLs['zoneGetUsers'] = "{{ url_for('xhr.zone.getUsers',zid=zid)}}";
@@ -168,11 +176,13 @@
                     {% endfor %}
                 </div>
 
+                {% if showTimeSlide %}
                 <div class="zone_timeslider">
                     <div id="timeslider-min" class="timeslider-hint">12:00</div>
                     <div id="timeslider" class="timeslider"></div>
                     <div id="timeslider-max" class="timeslider-hint">12:00</div>
                 </div>
+                {% endif %}
             </div>
 
         </div>

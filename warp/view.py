@@ -3,6 +3,7 @@ import flask
 from warp.db import *
 from . import utils
 from . import blob_storage
+from flask import current_app
 
 bp = flask.Blueprint('view', __name__)
 
@@ -48,7 +49,10 @@ def headerDataInit():
 
 @bp.route("/")
 def index():
-    return flask.render_template('index.html')
+    with current_app.open_resource('static/version.txt', 'r') as file:
+        version = file.readlines()[0]
+
+    return flask.render_template('index.html', version = version)
 
 @bp.route("/bookings/<string:report>")
 @bp.route("/bookings", defaults={"report": "" })
@@ -71,9 +75,21 @@ def zone(zid):
     if zoneRole is None:
         flask.abort(403)
 
+    zone = Zone.select(Zone.show_slider, Zone.min_time, Zone.max_time).where(Zone.id == zid)
+
     nextWeek = utils.getNextWeek()
+
+    min = 9*3600
+    max = 17*3600
+
+    if min < zone[0]['min_time']:
+        min = zone[0]['min_time']
+
+    if max > zone[0]['max_time']:
+        max = zone[0]['max_time']
+
     defaultSelectedDates = {
-        "slider": [9*3600, 17*3600]
+        "slider": [min, max]
     }
 
     for d in nextWeek[1:]:
@@ -90,12 +106,18 @@ def zone(zid):
     else:
         raise Exception('Undefined role')
 
+    showTimeSlide = 0
+    if zone[0]['show_slider']:
+        showTimeSlide = 1
 
     return flask.render_template('zone.html',
         **zoneRole,
         zid = zid,
         nextWeek=nextWeek,
-        defaultSelectedDates=defaultSelectedDates)
+        defaultSelectedDates=defaultSelectedDates,
+        showTimeSlide = showTimeSlide,
+        min = zone[0]['min_time'],
+        max = zone[0]['max_time'])
 
 @bp.route("/zone/image/<zid>")
 def zoneImage(zid):
@@ -135,7 +157,12 @@ def zones():
     if not flask.g.isAdmin:
         flask.abort(403)
 
-    return flask.render_template('zones.html')
+    defaultSelectedDates = {
+        "slider": [9*3600, 17*3600]
+    }
+
+    return flask.render_template('zones.html',
+            defaultSelectedDates=defaultSelectedDates)
 
 
 @bp.route("/groups/assign/<group_login>")

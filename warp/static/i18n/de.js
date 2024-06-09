@@ -213,4 +213,6 @@ warpGlobals.i18n.phrases = {
         "Es wurde mehr als eine Zeile ausgewählt. Der Bericht wird auf diese Anzahl von Zeilen beschränkt.||||"+
         "Es sind mehr als %{smart_count} Zeilen ausgewählt. Der Bericht wird auf diese Anzahl von Zeilen beschränkt.",
     "Add to group": "Zur Gruppe hinzufügen",
+    "Show time slider": "Zeitschieberegler anzeigen",
+    "Time available": "Verfügbare Zeit"
 };

@@ -5,7 +5,10 @@ services:
     environment:
       POSTGRES_PASSWORD: 'postgres_password'
   warp-demo-wsgi:
-    build: .
+    build:
+      context: .
+      args:
+        GIT_HASH: compose
     depends_on:
     - warp-demo-db
     environment:

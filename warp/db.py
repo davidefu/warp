@@ -14,7 +14,7 @@ Blobs = Table('blobs',('id','mimetype','data','etag'),primary_key='id')
 Users = Table('users',('login','password','name','account_type'))
 Groups = Table('groups',('group','login'))
 Seat = Table('seat',('id','zid','name','x','y','enabled'))
-Zone = Table('zone',('id','zone_group','name','iid'))
+Zone = Table('zone',('id','zone_group','name','iid','show_slider','min_time','max_time'))
 ZoneAssign = Table('zone_assign',('zid','login','zone_role'))
 Book = Table('book',('id','login','sid','fromts','tots'))
 SeatAssign = Table('seat_assign',('sid','login'))
@@ -84,6 +84,8 @@ def initDB(force = False):
 
     initScripts = current_app.config.get('DATABASE_INIT_SCRIPT')
 
+    migrationScripts = current_app.config.get('DATABASE_MIGRATION_SCRIPT')
+
     if not initScripts:
         print("DATABASE_INIT_SCRIPT not defined ")
         return
@@ -106,7 +108,28 @@ def initDB(force = False):
                 if not force:
 
                     try:
-                        DB.execute_sql(f"CREATE TABLE {_INITIALIZED_TABLE}();")
+                        cursor = DB.execute_sql(f"SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name = '{_INITIALIZED_TABLE}';")
+                        for value, in cursor:
+                            #if {_INITIALIZED_TABLE} already exists check for migration
+                            if value > 0:
+                                cursor2 = DB.execute_sql(f"select count(*) from {_INITIALIZED_TABLE};")
+                                #if no migration has been executed yet, add the new column
+                                for value2, in cursor2:
+                                    if value2 == 0:
+                                        DB.execute_sql(f"ALTER TABLE {_INITIALIZED_TABLE} ADD migrationname varchar NOT NULL;")
+                                        DB.execute_sql(f"ALTER TABLE {_INITIALIZED_TABLE} ADD CONSTRAINT db_initialized_pk PRIMARY KEY (migrationname);")
+                                
+                                #execute all the migration script
+                                for file in migrationScripts:
+
+                                    print(f'Executing migration: {file}')
+
+                                    with current_app.open_resource(file) as f:
+                                        sql = f.read().decode('utf8')
+                                        DB.execute(SQL(sql))
+
+                                return
+
                     except DatabaseError:
                         # database already initialized
                         return
@@ -122,7 +145,16 @@ def initDB(force = False):
                         DB.execute(SQL(sql))
 
                 # in case it is cleaned up in the above scripts (or force == True)
-                DB.execute_sql(f"CREATE TABLE IF NOT EXISTS {_INITIALIZED_TABLE}();")
+                DB.execute_sql(f"CREATE TABLE {_INITIALIZED_TABLE} (migrationname varchar NOT NULL,	CONSTRAINT db_initialized_pk PRIMARY KEY (migrationname));")
+
+                #after the base initialization execute the migration script
+                for file in migrationScripts:
+
+                    print(f'Executing migration: {file}')
+
+                    with current_app.open_resource(file) as f:
+                        sql = f.read().decode('utf8')
+                        DB.execute(SQL(sql))
 
             print('The database initialized.')
             break

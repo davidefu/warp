@@ -27,12 +27,17 @@ function downloadSeatData(seatFactory) {
 }
 
 function getSelectedDates() {
-    var slider = document.getElementById('timeslider');
-    var times = slider.noUiSlider.get(true);
-
-    // if next day 00:00, move it one second back
-    if (times[1] == 24*3600)
-        times[1] = 24*3600-1;
+    if (window.warpGlobals['showTimeSlide']) {
+        var slider = document.getElementById('timeslider');
+        var times = slider.noUiSlider.get(true);
+        
+        // if next day 00:00, move it one second back
+        if (times[1] == 24*3600)
+            times[1] = 24*3600-1;
+    }
+    else {
+        times = [0,24*3600-1];
+    }
 
     var res = [];
 
@@ -50,25 +55,27 @@ function getSelectedDates() {
 
 function initSlider() {
 
-    var slider = document.getElementById('timeslider');
-    noUiSlider.create(slider, {
-        start: window.warpGlobals['defaultSelectedDates'].slider,    //this later on can be anyway overwritten from session storage
-        connect: true,
-        behaviour: 'drag',
-        step: 15*60,
-        margin: 15*60,
-        orientation: 'vertical',
-        range: { 'min': 0, 'max': 24*3600 }
-    });
-
-    var minDiv = document.getElementById('timeslider-min');
-    var maxDiv = document.getElementById('timeslider-max');
-    slider.noUiSlider.on('update', function(values, handle, unencoded, tap, positions, noUiSlider) {
-        minDiv.innerText = new Date(unencoded[0]*1000).toISOString().substring(11,16)
-        maxDiv.innerText = unencoded[1] == 24*3600? "23:59": new Date(unencoded[1]*1000).toISOString().substring(11,16);
-    });
-
-    return slider;
+    if (window.warpGlobals['showTimeSlide']) {
+        var slider = document.getElementById('timeslider');
+        noUiSlider.create(slider, {
+            start: window.warpGlobals['defaultSelectedDates'].slider,    //this later on can be anyway overwritten from session storage
+            connect: true,
+            behaviour: 'drag',
+            step: 15*60,
+            margin: 15*60,
+            orientation: 'vertical',
+            range: { 'min': window.warpGlobals['minT'], 'max': window.warpGlobals['maxT'] }
+        });
+    
+        var minDiv = document.getElementById('timeslider-min');
+        var maxDiv = document.getElementById('timeslider-max');
+        slider.noUiSlider.on('update', function(values, handle, unencoded, tap, positions, noUiSlider) {
+            minDiv.innerText = new Date(unencoded[0]*1000).toISOString().substring(11,16)
+            maxDiv.innerText = unencoded[1] == 24*3600? "23:59": new Date(unencoded[1]*1000).toISOString().substring(11,16);
+        });
+    
+        return slider;
+    }
 }
 
 function initSeats() {
@@ -84,9 +91,11 @@ function initSeats() {
         seatFactory.updateAllStates(dates);
     }
 
-    var slider = document.getElementById('timeslider');
-    slider.noUiSlider.on('update', updateSeatsView);
-
+    if (window.warpGlobals['showTimeSlide']) {
+        var slider = document.getElementById('timeslider');
+        slider.noUiSlider.on('update', updateSeatsView);
+    }
+    
     for (var e of document.getElementsByClassName('date_checkbox')) {
         e.addEventListener('change',updateSeatsView);
     }
@@ -494,9 +503,11 @@ function initDateSelectorStorage() {
 
     restoredSelections.cb = cleanCBSelections;
 
-    var slider = document.getElementById('timeslider');
-    slider.noUiSlider.set(restoredSelections.slider);
-
+    if (window.warpGlobals['showTimeSlide']) {
+        var slider = document.getElementById('timeslider');
+        slider.noUiSlider.set(restoredSelections.slider);
+    }
+    
     storage.setItem('zoneSelections', JSON.stringify(restoredSelections));
 
     var cbChange = function(e) {
@@ -514,14 +525,15 @@ function initDateSelectorStorage() {
     for (let cb of document.getElementsByClassName('date_checkbox'))
         cb.addEventListener('change', cbChange);
 
-    slider.noUiSlider.on('update', function(values, handle, unencoded, tap, positions, noUiSlider) {
+    if (window.warpGlobals['showTimeSlide']) {
+        slider.noUiSlider.on('update', function(values, handle, unencoded, tap, positions, noUiSlider) {
 
-        let zoneSelections = JSON.parse( storage.getItem('zoneSelections'));
-        zoneSelections.slider = values;
-        storage.setItem('zoneSelections', JSON.stringify(zoneSelections));
+            let zoneSelections = JSON.parse( storage.getItem('zoneSelections'));
+            zoneSelections.slider = values;
+            storage.setItem('zoneSelections', JSON.stringify(zoneSelections));
 
-    });
-
+        });
+    }
 }
 
 function initShiftSelectDates() {
