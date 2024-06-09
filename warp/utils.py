@@ -4,6 +4,20 @@ from calendar import timegm
 from time import localtime,strftime,gmtime
 from jsonschema import validate, ValidationError
 import functools
+from datetime import datetime, timezone
+import calendar
+
+def are_on_same_date(epoch1, epoch2):
+    # Convert epoch timestamps to datetime objects
+    date1 = datetime.fromtimestamp(epoch1, timezone.utc).date()
+    date2 = datetime.fromtimestamp(epoch2, timezone.utc).date()
+    
+    # Compare the dates
+    return date1 == date2
+
+def add_time_tomidnight(epoch, time):
+    # Convert epoch timestamps to datetime objects
+    return calendar.timegm(datetime.fromtimestamp(epoch, timezone.utc).date().timetuple()) + time
 
 def now():
     """ Returns number of seconds since midnight 1970-1-1 in the current timezone until now"""

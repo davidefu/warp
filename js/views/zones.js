@@ -6,7 +6,34 @@ import WarpModal from './modules/modal.js';
 import {TabulatorFull as Tabulator} from 'tabulator-tables';
 import "./css/tabulator/tabulator_materialize.scss";
 
+import noUiSlider from 'nouislider';
+import "./css/zone/nouislider_materialize.scss";
+
+function initSlider() {
+
+    var slider = document.getElementById('timeslider');
+    noUiSlider.create(slider, {
+        start: window.warpGlobals['defaultSelectedDates'].slider,    //this later on can be anyway overwritten from session storage
+        connect: true,
+        behaviour: 'drag',
+        step: 15*60,
+        margin: 15*60,
+        range: { 'min': 0, 'max': 24*3600 }
+    });
+
+    var minDiv = document.getElementById('timeslider-min');
+    var maxDiv = document.getElementById('timeslider-max');
+    slider.noUiSlider.on('update', function(values, handle, unencoded, tap, positions, noUiSlider) {
+        minDiv.innerText = new Date(unencoded[0]*1000).toISOString().substring(11,16)
+        maxDiv.innerText = unencoded[1] == 24*3600? "23:59": new Date(unencoded[1]*1000).toISOString().substring(11,16);
+    });
+
+    return slider;
+}
+
 document.addEventListener("DOMContentLoaded", function(e) {
+
+    initSlider();
 
     var iconFormater = function(cell, formatterParams, onRendered) {
         var icon = formatterParams.icon || "warning";
@@ -23,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
         if (typeof(cell) === 'object') {
             let data = cell.getRow().getData();
-            args = [ data['id'],data['name'],data['zone_group'] ];
+            args = [ data['id'],data['name'],data['zone_group'],data['show_slider'],data['min_time'],data['max_time'] ];
         }
 
         showEditDialog.apply(null,args)
@@ -85,13 +112,14 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
     var editModalEl = document.getElementById('edit_modal');
     var zoneNameEl = document.getElementById("zone_name");
+    var zoneShowSliderEl = document.getElementById("zone_showslider");
     var zoneGroupEl = document.getElementById("zone_group");
     var errorDiv = document.getElementById('error_div');
     var errorMsg = document.getElementById('error_message');
     var saveBtn = document.getElementById('edit_modal_save_btn');
     var deleteBtn = document.getElementById('edit_modal_delete_btn');
 
-    showEditDialog = function(id,name,zoneGroup) {
+    showEditDialog = function(id,name,zoneGroup,showSlider,minTime,maxTime) {
 
         var editModal = M.Modal.getInstance(editModalEl);
         if (typeof(editModal) === 'undefined') {
@@ -103,6 +131,15 @@ document.addEventListener("DOMContentLoaded", function(e) {
         zoneGroupEl.value = zoneGroup || "";
         errorDiv.style.display = "none";
         errorMsg.innerText = "";
+
+        var zoneShowSlider = showSlider === null ? true : showSlider;
+        zoneShowSliderEl.checked = zoneShowSlider;
+
+        var zoneminTime = minTime || 0;
+        var zonemaxTime = maxTime || 86399;
+
+        var slider = document.getElementById('timeslider');
+        slider.noUiSlider.set([zoneminTime, zonemaxTime]);
 
         M.updateTextFields();
 
@@ -127,7 +164,8 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
                         resolved = true;
                         editModal.close();
-                        resolve({action:'save', id: id, name: zoneNameEl.value, zone_group: parseInt(zoneGroupEl.value) });
+                        var times = slider.noUiSlider.get(true);
+                        resolve({action:'save', id: id, name: zoneNameEl.value, zone_group: parseInt(zoneGroupEl.value), show_slider: zoneShowSliderEl.checked, min_time: Math.trunc(times[0]), max_time: Math.trunc(times[1]) });
                         break;
                     case deleteBtn:
 

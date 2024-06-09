@@ -211,4 +211,6 @@ warpGlobals.i18n.phrases = {
         "Plus d'une ligne est sélectionnée. Le rapport sera limité à ce nombre de lignes.||||"+
         "Plus de %{smart_count} lignes sont sélectionnées. Le rapport sera limité à ce nombre de lignes..",
     "Add to group": "Ajouter au groupe",
+    "Show time slider": "Afficher le curseur temporel",
+    "Time available": "Temps disponible"
 };

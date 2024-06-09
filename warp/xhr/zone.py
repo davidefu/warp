@@ -295,12 +295,6 @@ def apply():
 
     if 'book' in apply_data:
 
-        if not flask.g.isAdmin:     # TODO: should admin be allowed to do that?
-            for b in apply_data['book']['dates']:
-                if b['fromTS'] < ts["fromTS"] or b['fromTS'] > ts["toTS"] \
-                    or b['toTS'] < ts["fromTS"] or b['toTS'] > ts["toTS"]:
-                    return {"msg": "Forbidden", "code": 103}, 403
-
         sid = apply_data['book']['sid']
         login = apply_data['book'].get('login', flask.g.login)
 
@@ -324,6 +318,25 @@ def apply():
         if (assignedQ.scalar() is not None and assignedToMeQ.scalar() is None):
             return {"msg": "Forbidden", "code": 106}, 403
 
+        zone = Seat.select(Zone.show_slider, Zone.min_time, Zone.max_time) \
+                    .join(Zone, on=(Seat.zid == Zone.id)) \
+                    .where( (Seat.id == sid) ) \
+                    .first()
+        
+        for b in apply_data['book']['dates']:
+            if b['fromTS'] < ts["fromTS"] or b['fromTS'] > ts["toTS"] \
+                or b['toTS'] < ts["fromTS"] or b['toTS'] > ts["toTS"]:
+                return {"msg": "Forbidden", "code": 103}, 403
+            if utils.are_on_same_date(b['fromTS'], b['toTS']) == False:
+                return {"msg": "Forbidden", "code": 103}, 403
+            if zone['show_slider'] == False:
+                b['fromTS'] = utils.add_time_tomidnight(b['fromTS'], zone['min_time'])
+                b['toTS'] = utils.add_time_tomidnight(b['toTS'], zone['max_time'])
+            if b['fromTS'] < utils.add_time_tomidnight(b['fromTS'], zone['min_time']) \
+                    or b['toTS'] > utils.add_time_tomidnight(b['toTS'], zone['max_time']):
+                return {"msg": "Forbidden", "code": 103}, 403
+            if b['fromTS'] > b['toTS']:
+                return {"msg": "Forbidden", "code": 103}, 403
     # -------------------------------------
     # APPLY CHANGES
     # -------------------------------------

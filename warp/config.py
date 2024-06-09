@@ -43,6 +43,9 @@ class DefaultSettings(object):
     LDAP_GROUP_STRICT_MAPPING = False
     LDAP_EXCLUDED_USERS = []
 
+    DATABASE_MIGRATION_SCRIPT = [
+        "sql/migration_showTimeSlider.sql"
+    ]
     ### LDAP variables to be configured
     # AUTH_LDAP = True
     # LDAP_SERVER_URL = "ldap://server:port"
