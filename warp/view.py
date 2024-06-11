@@ -110,14 +110,19 @@ def zone(zid):
     if zone[0]['show_slider']:
         showTimeSlide = 1
 
+    zonemin = zone[0]['min_time']
+    zonemax = zone[0]['max_time']
+    if zonemax == 24*3600-1:
+        zonemax = 24*3600
+
     return flask.render_template('zone.html',
         **zoneRole,
         zid = zid,
         nextWeek=nextWeek,
         defaultSelectedDates=defaultSelectedDates,
         showTimeSlide = showTimeSlide,
-        min = zone[0]['min_time'],
-        max = zone[0]['max_time'])
+        min = zonemin,
+        max = zonemax)
 
 @bp.route("/zone/image/<zid>")
 def zoneImage(zid):
