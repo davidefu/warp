@@ -433,13 +433,3 @@ You can generate it with Python (just make sure you have activated the environme
 python -c 'from getpass import getpass; from werkzeug.security import generate_password_hash; print(generate_password_hash(getpass()))'
 
 ```
-
-# Other
-
-## How can I support you
-
-Oh.. I was not expecting that, but you can send a beer via PayPal: https://paypal.me/sebo271
-
-### Can I pay for a feature or support
-
-Reach me out on my mail (git log is your friend), and we can discuss.
